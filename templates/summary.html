@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Summarization App</title>
+</head>
+<body>
+    <h1>Summarization</h1>
+
+    <form id="summarizeForm" enctype="multipart/form-data">
+        <input type="text" id="summaryRequest" placeholder="Enter your summary request">
+        <input type="file" id="fileInput" accept=".pdf, .txt" multiple required>
+        <button type="submit">Summarize</button>
+    </form>
+
+    <div id="summaryResult"></div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#summarizeForm").submit(function (e) {
+                e.preventDefault();
+
+                var formData = new FormData(this);
+                var summaryRequest = $("#summaryRequest").val();
+
+                formData.append("summaryRequest", summaryRequest);
+
+                $.ajax({
+                    url: "/summarization",
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        var summary = response.summary;
+                        $("#summaryResult").text("Summary: " + summary);
+                    },
+                    error: function () {
+                        alert("Error summarizing the documents.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Generation and Summarization</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #ffdde7;
+            margin: 0;
+            padding: 0;
+        }
+        
+        h1 {
+            text-align: center;
+            background-color: #3498db;
+            color: #fff;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        h2 {
+            color: red;
+        }
+        
+        section {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            background-color: #f2f6ff;
+        }
+        
+        label {
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        button:hover {
+            background-color: #ed0331;
+        }
+        
+        div {
+            margin-top: 10px;
+        }
+        
+        #text-generation-module, #summarization-module {
+            margin-top: 40px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <h1>Text Generation and Summarization</h1>
+  
+    <section id="text-generation-module">
+        <h2>Text Generation</h2>
+        <label for="keyword">Enter a keyword:</label></br>
+        <input type="text" id="keyword" placeholder="e.g., life"></br>
+        <button id="generateBtn">Generate Text</button>
+        <div id="output"></div>
+    </section>
+
+    <section id="summarization-module">
+        <h2>Summarization</h2>
+        <label for="summaryRequest">Enter your summary request:</label></br>
+        <input type="text" id="summaryRequest" placeholder="e.g., summarize this text"></br>
+        <input type="file" id="fileInput" accept=".pdf, .txt" multiple required></br>
+        <button id="summarizeBtn">Summarize</button>
+        <div id="summaryResult"></div>
+    </section>
+
+    <script>
+        const generateBtn = document.getElementById("generateBtn");
+        const keywordInput = document.getElementById("keyword");
+        const outputDiv = document.getElementById("output");
+
+        generateBtn.addEventListener("click", () => {
+            const keyword = keywordInput.value;
+
+            // Prepare the request data
+            const requestData = {
+                keyword: keyword
+            };
+
+            // Make a POST request to the Flask backend for text generation
+            fetch("/generate-text", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the generated text in the outputDiv
+                outputDiv.textContent = data.generated_text;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+
+        const summarizeBtn = document.getElementById("summarizeBtn");
+        const summaryRequestInput = document.getElementById("summaryRequest");
+        const fileInput = document.getElementById("fileInput");
+        const summaryResultDiv = document.getElementById("summaryResult");
+
+        summarizeBtn.addEventListener("click", () => {
+            const summaryRequest = summaryRequestInput.value;
+            const files = fileInput.files;
+
+            // Create a FormData object to send files
+            const formData = new FormData();
+            formData.append("summaryRequest", summaryRequest);
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append("files", files[i]);
+            }
+
+            // Make a POST request to the Flask backend for summarization
+            fetch("/summarization", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display the summary result in the summaryResultDiv
+                summaryResultDiv.textContent = data.summary;
+            })
+            .catch(error => {
+                console.error("Error:", error);
+            });
+        });
+    </script>
+
+</body>
+</html>
